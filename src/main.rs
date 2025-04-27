@@ -1,5 +1,5 @@
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
-use rsa::pkcs8::DecodePrivateKey;
+use rsa::pkcs1::DecodeRsaPrivateKey;
 use rsa::{Pkcs1v15Encrypt, RsaPrivateKey};
 use std::fs::File;
 use std::io::Read;
@@ -24,7 +24,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .map_err(|e| format!("Could not open private key file {}", e))?
         .read_to_string(&mut privkey_pem)?;
 
-    let private_key = RsaPrivateKey::from_pkcs8_pem(&privkey_pem)
+    let private_key = RsaPrivateKey::from_pkcs1_pem(&privkey_pem)
         .map_err(|e| format!("RSA-key import failed: {}", e))?;
 
     // Open the session key file and read the contents into a string
