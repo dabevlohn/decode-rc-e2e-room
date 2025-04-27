@@ -18,3 +18,7 @@ cargo install hurl
 - run `just get-config-from-template`
 - run `just get-e2e-room-messages`
 - run `just decode-e2e-room-messages`
+
+## Demo
+
+![HowToUse](./assets/howtouse.svg)

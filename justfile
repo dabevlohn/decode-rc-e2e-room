@@ -10,7 +10,7 @@ get-e2e-room-messages:
 # Decode messages
 decode-e2e-room-messages: 
 	echo "Decoding room key and messages"
-	cargo run rsa_private_key.pem session_encoded.key messages.csv
+	cargo run private_rsa_key.pem session_encoded.key messages.csv
 
 # Use your own data for authorization
 get-config-from-template:
