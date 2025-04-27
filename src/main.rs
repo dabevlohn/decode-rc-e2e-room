@@ -33,9 +33,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .map_err(|e| format!("Could not open session key file {}", e))?
         .read_to_string(&mut sesskey_b64uri)?;
 
+    // dbg!(sesskey_b64uri.clone());
+
     // Decode sesskey with URL-safe Base64 encoding
     let sesskey_enc = URL_SAFE_NO_PAD
-        .decode(sesskey_b64uri)
+        .decode(sesskey_b64uri.trim().to_string())
         .map_err(|e| format!("Session key decoding failed:  {}", e))?;
 
     // Decode sesskey with private RSA key
