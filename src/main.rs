@@ -1,7 +1,7 @@
-use aes::cipher::{block_padding::Pkcs7, BlockDecryptMut, KeyIvInit};
 use aes::Aes128;
+use aes::cipher::{BlockDecryptMut, KeyIvInit, block_padding::Pkcs7};
 use base64::{
-    engine::general_purpose::STANDARD, engine::general_purpose::URL_SAFE_NO_PAD, Engine as _,
+    Engine as _, engine::general_purpose::STANDARD, engine::general_purpose::URL_SAFE_NO_PAD,
 };
 use csv::Reader;
 use rsa::pkcs1::DecodeRsaPrivateKey;
@@ -34,26 +34,25 @@ struct Message {
 fn read_csv<P: AsRef<Path>>(filename: P, key: &[u8]) -> Result<(), Box<dyn Error>> {
     let file = File::open(filename)?;
     let mut rdr = Reader::from_reader(file);
-    let mut iter = rdr.deserialize();
 
     // Iterate CSV file line by line
-    while let Some(result) = iter.next() {
+    for result in &mut rdr.deserialize() {
         let record: Record = result?;
         // Try to trim message from quotes
-        let msg_b64 = record.message.replace('"', &"");
+        let msg_b64 = record.message.replace('"', "");
         // Get complex message
         let compl = STANDARD.decode(&msg_b64[12..msg_b64.len()])?;
         // Get vector from conplex
         let iv = &compl[0..16];
         // Get encrypted message from conplex
         let ciphertext = &compl[16..compl.len()];
-        let decryptor = Aes128CbcDec::new_from_slices(&key, &iv)?;
+        let decryptor = Aes128CbcDec::new_from_slices(key, iv)?;
         // Decrypt message
         let plaintext = decryptor
-            .decrypt_padded_vec_mut::<Pkcs7>(&ciphertext)
+            .decrypt_padded_vec_mut::<Pkcs7>(ciphertext)
             .map_err(|e| format!("Ciphertext decryption error: {}", e))?;
         let plaintext = str::from_utf8(&plaintext)?;
-        let msg = serde_json::from_str::<Message>(&plaintext)?;
+        let msg = serde_json::from_str::<Message>(plaintext)?;
         // Print decrypted message
         println!("{}-> {}", record.name, msg.msg);
     }
@@ -94,7 +93,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Decode sesskey with URL-safe Base64 encoding
     let sesskey_enc = URL_SAFE_NO_PAD
-        .decode(sesskey_b64uri.trim().to_string())
+        .decode(sesskey_b64uri.trim())
         .map_err(|e| format!("Session key decoding failed:  {}", e))?;
 
     // Decode sesskey with private RSA key
